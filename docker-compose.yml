@@ -1,0 +1,44 @@
+version: '3'
+
+services:
+  api_service:
+    build: ./api_service
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: ${REDIS_PORT}
+      RABBITMQ_URL: ${RABBITMQ_URL}
+      RABBITMQ_QUEUE: ${RABBITMQ_QUEUE}
+      REDIS_OPERATIONS_HASH: ${REDIS_OPERATIONS_HASH}
+    depends_on:
+      - redis
+      - rabbitmq
+    ports:
+      - "${APP_PORT}:3000"
+
+  worker_service:
+    build: ./worker_service
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: ${REDIS_PORT}
+      RABBITMQ_URL: ${RABBITMQ_URL}
+      RABBITMQ_QUEUE: ${RABBITMQ_QUEUE}
+      REDIS_OPERATIONS_HASH: ${REDIS_OPERATIONS_HASH}
+    depends_on:
+      - redis
+      - rabbitmq
+
+  redis:
+    image: "redis:alpine"
+    ports:
+      - "${REDIS_PORT}:6379"
+
+  rabbitmq:
+    image: "rabbitmq"
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - "rabbitmq_data:/var/lib/rabbitmq"
+
+volumes:
+  rabbitmq_data:
